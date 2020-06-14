@@ -36,21 +36,38 @@ for i in range(rows):
 
 for i in range(cols):
     for j in range(rows):
-        grid[i][j].show(colors["black"])
+        grid[i][j].initial_draw(colors["black"])
 pygame.display.update()
 
+mouse = pygame.mouse
 
-def detect_mouse_over():
-    mousex, mousey = pygame.mouse.getpos()
-    if not (not (mousex > 0) or not (mousex < WIDTH)) and 0 < mousey < HEIGHT:
-        grid[mousex // rows][mousey // cols].show(colors["red"], s=0)
 
+# fpsClock = pygame.time.Clock()
+
+
+def detect_mouse_over(color):
+    mousex, mousey = pygame.mouse.get_pos()
+    if 0 < mousex < WIDTH and 0 < mousey < HEIGHT:
+        grid[mousex // int(w)][mousey // int(h)].mouse_click_draw(color, s=0)
+        # pygame.display.update()
 
 while 1:
-    ev = pygame.event.poll()
-    if ev.type == pygame.QUIT:
-        pygame.quit()
+    left_pressed, middle_pressed, right_pressed = mouse.get_pressed()
 
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+    if left_pressed:
+        detect_mouse_over(colors["red"])
+    if right_pressed:
+        detect_mouse_over(colors["black"])
+    if middle_pressed:
+        screen.fill(colors["gray"])
+        for row in grid:
+            for element in row:
+                element.initial_draw(colors["black"])
+        pygame.display.update()
+    # detect_mouse_over()
     pygame.display.update()
-    # screen.fill(gray)
     # pygame.display.flip()
