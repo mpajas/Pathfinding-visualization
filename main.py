@@ -2,9 +2,7 @@ import os, sys
 import pygame
 from pygame.locals import *
 import Node
-
-if not pygame.font: print('Warning, fonts disabled')
-if not pygame.mixer: print('Warning, sound disabled')
+import Astar
 
 pygame.init()
 
@@ -27,29 +25,35 @@ cols = 50
 w = WIDTH / rows
 h = HEIGHT / cols
 
+#making a grid of Nodes (rectangles)
 grid = []
 for i in range(rows):
     row = []
     for j in range(cols):
         row.append(Node.Node(screen, i, j, w, h))
     grid.append(row)
-
+#initial drawing of the grid
 for i in range(cols):
     for j in range(rows):
         grid[i][j].initial_draw(colors["black"])
 pygame.display.update()
+#adding neighbours of each grid member
+for i in range(cols):
+    for j in range(rows):
+        grid[i][j].add_neighbours(grid)
+
+start = grid[10][10]
+end = grid[43][48]
 
 mouse = pygame.mouse
 
+fpsClock = pygame.time.Clock()
 
-# fpsClock = pygame.time.Clock()
+pathfinder = Astar.Astar(grid,grid[0][0],grid[49][49])
 
-
-def detect_mouse_over(color):
-    mousex, mousey = pygame.mouse.get_pos()
-    if 0 < mousex < WIDTH and 0 < mousey < HEIGHT:
-        grid[mousex // int(w)][mousey // int(h)].mouse_click_draw(color, s=0)
-        # pygame.display.update()
+def mouse_click(color):
+    mousex, mousey = mouse.get_pos()
+    grid[mousex // int(w)][mousey // int(h)].draw(color, s=0, mouse=True)
 
 while 1:
     left_pressed, middle_pressed, right_pressed = mouse.get_pressed()
@@ -58,16 +62,21 @@ while 1:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-    if left_pressed:
-        detect_mouse_over(colors["red"])
-    if right_pressed:
-        detect_mouse_over(colors["black"])
-    if middle_pressed:
-        screen.fill(colors["gray"])
-        for row in grid:
-            for element in row:
-                element.initial_draw(colors["black"])
-        pygame.display.update()
-    # detect_mouse_over()
-    pygame.display.update()
-    # pygame.display.flip()
+
+        if left_pressed:
+            mouse_click(colors["black"])
+
+        if right_pressed:
+            #mouse_click(colors["black"])
+            pathfinder.astar()
+
+        if middle_pressed:
+            screen.fill(colors["gray"])
+            for row in grid:
+                for element in row:
+                    element.initial_draw(colors["black"])
+            pygame.display.update()
+
+
+    #pygame.display.update()
+    pygame.display.flip()
